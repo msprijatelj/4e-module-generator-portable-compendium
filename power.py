@@ -80,7 +80,7 @@ if __name__ == '__main__':
         if "<span" in powername:
             powername = str(parsed_html[0].next.nextSibling)
         fg_entry['name'] = powername
-        fg_entry['source'] = str(parsed_html[0].contents[1].next)
+        fg_entry['source'] = str(parsed_html[0].contents[0].next)
 
         # Ensure this is a flavor text
         flavor = str(parsed_html[1])

@@ -128,8 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Compendium SQL files
+# Compendium SQL & HTML files
 *.sql
+*.html
 
 # Generated DB and mod files
 *db.xml
