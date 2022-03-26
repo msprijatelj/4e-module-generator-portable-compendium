@@ -43,7 +43,7 @@ def power_gen(header, body, action_type):
     fg_power['recharge'] = ''
     full_html_header = str(header)
     has_recharge = full_html_header.find('images/symbol/x.gif')
-    if has_recharge is not -1:
+    if has_recharge != -1:
         recharge = full_html_header.partition('<img src="images/symbol/x.gif"/>')
         recharge = recharge[2].replace('<b>', '').replace('</b>', '').replace('</p>', '').replace('<br/>', '')
         recharge = sanitize_dices(recharge)
@@ -152,19 +152,19 @@ def is_last_statblock(tag):
 def retrieve_action(tag):
     action_header = str(tag.text)
     # Get first word after first parenthesis
-    if action_header.find('(standard') is not -1:
+    if action_header.find('(standard') != -1:
         return 'Standard'
-    if action_header.find('(immediate') is not -1:
+    if action_header.find('(immediate') != -1:
         return 'Triggered'
-    if action_header.find('(opportunity') is not -1:
+    if action_header.find('(opportunity') != -1:
         return 'Triggered'
-    if action_header.find('( when') is not -1:
+    if action_header.find('( when') != -1:
         return 'Triggered'
-    if action_header.find('(minor') is not -1:
+    if action_header.find('(minor') != -1:
         return 'Minor'
-    if action_header.find('(move') is not -1:
+    if action_header.find('(move') != -1:
         return 'Move'
-    if action_header.find('(free') is not -1:
+    if action_header.find('(free') != -1:
         return 'Free'
     return 'Trait'
 
