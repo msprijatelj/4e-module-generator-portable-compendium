@@ -132,8 +132,9 @@ if __name__ == '__main__':
 
     export_dir = f'{os.getcwd()}/export/feats'
     archive_fmt = 'zip'
-    tmp_name = '4e_Feat'
-    mod_name = '4e_Feat_PortableCompendium.mod'
+    data_dir = f'{export_dir}/data/'
+    tmp_name = f'{export_dir}/4e_Feat'
+    mod_name = f'{export_dir}/4e_Feat_PortableCompendium.mod'
 
     # Write FG XML database files
     write_db(f'{export_dir}/data/db.xml', Feat_fg)
@@ -141,11 +142,11 @@ if __name__ == '__main__':
     print("Database files written. Job done.")
 
     try:
-        os.remove(f'{export_dir}/{mod_name}')
+        os.remove(mod_name)
     except FileNotFoundError:
         print("Cleanup not needed.")
-    shutil.make_archive(f'{export_dir}/{tmp_name}', archive_fmt, f'{export_dir}/data/')
-    os.rename(f'{export_dir}/{tmp_name}.{archive_fmt}', f'{export_dir}/{mod_name}')
+    shutil.make_archive(tmp_name, archive_fmt, data_dir)
+    os.rename(f'{tmp_name}.{archive_fmt}', mod_name)
 
     print("\nDatabase added and module generated!")
     print("You can find it in the 'export\\feat' folder\n")
