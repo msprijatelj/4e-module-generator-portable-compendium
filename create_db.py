@@ -1,0 +1,44 @@
+def create_db(fn, splt):
+    print(f"Filename: {fn}")
+    with open(f'sources/{fn}', 'r+', encoding='utf-8-sig') as f:
+        contents = f.read()
+
+    db_schema = get_schema(contents)
+    db_values = get_values(contents, splt)
+    return db_schema, db_values
+
+def get_schema(contents):
+    insert_index = contents.find("INSERT")
+    query = contents[:insert_index].strip()
+    lines = query.split("\n")
+    schema = []
+    for line in lines:
+        line = line.strip()
+        start_index = line.find("`")
+        if start_index == 0:
+            end_index = line.find("`", start_index + 1)
+            col_name = line[start_index + 1:end_index]
+            schema.append(col_name)
+    return schema
+
+def get_values(contents, splt):
+    insert_index = contents.find("INSERT")
+
+    # Retrieve only the INSERT queries
+    query = contents[insert_index:].strip()
+    queries = query.split("\n")
+
+    values = [tuple()]*len(queries)
+    for i, q in enumerate(queries):
+        # Take off the INSERT part of the query
+        value_str = q.split("VALUES ('")[1]
+        # Take off the tail of the query
+        value_str = "".join(value_str.split("');")[:-1])
+        values[i] = value_str.split(splt)
+        break
+    return values
+
+if __name__ == "__main__":
+    SCHEMA, VALUES = create_db("ddiMonster.sql", "','")
+    print(SCHEMA)
+    print(VALUES[0])
