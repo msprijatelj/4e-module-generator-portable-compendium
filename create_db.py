@@ -39,7 +39,7 @@ def get_values(contents, splt):
         value_str = q.split("VALUES ('")[1]
         # Take off the tail of the query
         value_str = "".join(value_str.split("');")[:-1])
-        values[i] = value_str.split(splt)
+        values[i] = tuple(value_str.split(splt))
     return values
 
 if __name__ == "__main__":

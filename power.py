@@ -5,6 +5,7 @@ import pathlib
 import json
 from urllib.parse import unquote
 from create_db import create_db
+from bs4 import BeautifulSoup, Tag, NavigableString
 
 
 def write_db(filepath, fg_data):
@@ -17,7 +18,7 @@ def write_db(filepath, fg_data):
             file.write(f'		<id-{string_id}>\n')
             file.write(f'			<action type="string">{entry["action"]}</action>\n')
             file.write('			<description type="formattedtext">\n')
-            file.write(f'				<p></p>\n')
+            file.write(f'				{entry["description"]}\n')
             file.write('			</description>\n')
             file.write(f'			<flavor type="string">{entry["flavor"]}</flavor>\n')
             file.write(f'			<keywords type="string">{entry["keywords"]}</keywords>\n')
@@ -27,13 +28,32 @@ def write_db(filepath, fg_data):
             file.write(f'			<name type="string">{entry["name"]}</name>\n')
             file.write(f'			<range type="string">{entry["range"]}</range>\n')
             file.write(f'			<recharge type="string">{entry["recharge"]}</recharge>\n')
-            desc = entry["shortdescription"].replace(u'\xa0', ' ')
-            file.write(f'			<shortdescription type="string">{repr(desc)[1:-1]}</shortdescription>\n')
+            file.write(f'			<shortdescription type="string">{entry["shortdescription"]}</shortdescription>\n')
             file.write(f'			<source type="string">{entry["source"]}</source>\n')
             file.write(f'		</id-{string_id}>\n')
             id = id + 1
         file.write('	</powerdesc>\n')
         file.write('</root>')
+
+
+def construct_description(tags):
+    description = []
+    shortdescription = []
+    for t in tags:
+        p_tags = t.find_all('p', class_=['powerstat', 'flavor'])
+        if p_tags:
+            desc, sdesc = construct_description(p_tags)
+            description += desc
+            shortdescription+= sdesc
+        else:
+            soup = BeautifulSoup(str(t), features="html.parser")
+            if soup.p:
+                soup.p.wrap(soup.new_tag('p'))
+                soup.p.p.unwrap()
+                description += [str(soup)]
+                shortdescription += [soup.text]
+    return description, shortdescription
+
 
 
 if __name__ == '__main__':
@@ -49,12 +69,6 @@ if __name__ == '__main__':
     except:
         print("Error reading data source.")
 
-    for index, section in enumerate(sql_sections):
-        html = section.split('.</p>\\r\\n    ', 1)[0] + '.</p>'
-        html = '<h1' + html.split('<h1', 1)[1]
-        html = html.replace('\\', '')
-    
-
     print(f"{len(db)} entries recovered")
 
     # Convert data to FG format
@@ -63,130 +77,93 @@ if __name__ == '__main__':
     # Initialize all modules databases
     Powers_fg = []
 
-    try:
-        from BeautifulSoup import BeautifulSoup
-    except ImportError:
-        from bs4 import BeautifulSoup, Tag, NavigableString
-
     if not db:
         print("NO DATA FOUND IN SOURCES, MAKE SURE YOU HAVE COPIED YOUR 4E PORTABLE COMPENDIUM DATA TO SOURCES!")
         input('Press enter to close.')
         sys.exit(0)
 
     for row in db:
+
         fg_entry = {}
-        fg_entry['name'] = row['Name']
-        fg_entry['action'] = row['Action']
+
+        # Retrieve the data with dedicated columns
+        fg_entry['name'] = row['Name'].replace('\\', '')
         fg_entry['recharge'] = row['Usage']
-        fg_entry['published'] = row['Source'].split(", ")
+        fg_entry['published'] = row['Source'].replace('\\', '').split(", ")
 
-        source = f"{row['Class']} {row['Kind']}"
-        level = row['Level']
-        source = source + f" {level}" if level != 0 else source
-        fg_entry['source'] = source
-
+        # Parse the HTML text 
         html = row['Txt']
         html = html.replace('\\r\\n','\r\n').replace('\\','')
-
         parsed_html = BeautifulSoup(html, features="html.parser")
 
+        # Power source doesn't always match with "{Class} {Kind} {Level}".
+        # Ergo, get it directly from the power's header.
+        power_source = parsed_html.find('span', class_='level')
+        fg_entry['source'] = power_source.text
+
+        # Get the Power statline:  Recharge, Keywords, Action, and Range.
+        # We already have Recharge & Action; get Keywords & Range.
         powerstat = parsed_html.find('p', class_='powerstat')
-        print(type(powerstat))
-        top_stat, bot_stat = powerstat.split("<br/>")
-        print(top_stat)
-        print(bot_stat)
+
+        # If a power has a bullet, check for keywords after the bullet but
+        # before the line break.
+        keywords = []
+        power_bullet = powerstat.find('img', attrs={'src': 'images/bullet.gif'})
+        if power_bullet:
+            for tag in power_bullet.next_siblings:
+                if tag.name == "br":
+                    break
+                elif tag.name == "b":
+                    keywords.append(tag.text)
+        
+        fg_entry['keywords'] = ", ".join(keywords)
+
+        # Find the Action, immediately after the stat line break.
+        powerstat_br = powerstat.find('br')
+        powerstat_action = powerstat_br.find_next_sibling('b')
+        fg_entry['action'] = powerstat_action.text
+
+        # Find the range, if present; it's always after the Action.
+        powerstat_rg_type = powerstat_action.find_next_sibling('b')
+        range_str = ""
+        if powerstat_rg_type:
+            powerstat_rg = powerstat_rg_type.next_sibling
+            rg_text = powerstat_rg.text if powerstat_rg else ""
+            range_str = f"{powerstat_rg_type.text}{rg_text}"
+
+        fg_entry['range'] = range_str
+
+        # Acquire flavor text, if present. Flavor text is always in italics.
+        flavortext = ""
+        if flavor_tag := parsed_html.select_one('.flavor > i'):
+            flavortext = flavor_tag.text
+        fg_entry['flavor'] = flavortext
+
+        # Everything in a 'p' tag after the stat line is mechanics text.
+        # Mechanics are either 'powerstat' or 'flavor'.
+        # Description will include all mechanics text + Published line.
+        power_mechanics = powerstat.find_next_siblings('p', class_=['powerstat', 'flavor'])
 
 
-        # Ensure this is a flavor text
-        flavor = str(parsed_html[1])
-        if '<i>' in flavor:
-            flavor = str(parsed_html[1].string)
-        else:
-            flavor = ''
-        fg_entry['flavor'] = flavor
+        try:
+            description, shortdescription = construct_description(power_mechanics)
 
-        # Recover range (check if present in parsed_html[2] and go search it in parsed_html[1] otherwise)
-        l = len(parsed_html[2].contents)
-        rg = str(parsed_html[2].contents[l-2].string) + str(parsed_html[2].contents[l-1].string)
-        if 'Close' in rg or 'Melee' in rg or 'Ranged' in rg or 'Personal' in rg:
-            ...
-        else:
-            l = len(parsed_html[1].contents)
-            rg = str(parsed_html[1].contents[l-2].string) + str(parsed_html[1].contents[l-1].string)
-        fg_entry['range'] = rg
+            # Grab the Published line without external links, in class-less p tag
+            published_in = parsed_html.find('p', class_='publishedIn')
+            pub_soup = BeautifulSoup(str(published_in), features="html.parser")
+            pub_soup.p.wrap(pub_soup.new_tag('p'))
+            pub_soup.p.p.replace_with(pub_soup.p.p.text)
+            description.append(str(pub_soup))
+            shortdescription.append(pub_soup.text)
+        except:
+            print(f"Problem with {row['Name']}")
+            raise
 
-        # Generate keywords (Concat all strings between 02 and LEN-7 of parsed_html[2] contents)
-        keywords_concat = ""
-        keywords_source = parsed_html[2].contents
-        i = 0
-        start_index = None
-        for content in keywords_source:
-            if '✦' in content:
-                start_index = i
-            elif '<br/>' in str(content):
-                end_index = i
-            i = i + 1
-        if not end_index:
-            end_index = len(keywords_source)
-        if start_index is not None:
-            keywords_source = keywords_source[start_index+1:end_index]
-            for content in keywords_source:
-                keywords_concat = keywords_concat + str(content.string)
-        else:
-            keywords_concat = ""
-        fg_entry['keywords'] = keywords_concat
-
-        # get all from main content, keep or emulate line breaks. Always starts at base content 03
-        shortdescription = ""
-        laraget = parsed_html[1].text
-        record = False
-
-        # recover keywords
-        keywords_concat = ""
-        for tag in parsed_html:
-            if isinstance(tag, Tag):
-                for t in tag.contents:
-                    if isinstance(t, Tag) and ('src' in t.attrs) and 'images/bullet.gif' in t.attrs['src']:
-                        record = True
-                        continue
-                    if isinstance(t, Tag) and 'br' in t.name:
-                        record = False
-                        keywords_concat = keywords_concat[:-2]
-                    if record is True:
-                        if isinstance(t, Tag):
-                            keywords_concat = keywords_concat + str(t.string) + ", "
-        fg_entry['keywords'] = keywords_concat
-
-        record = False
-        for tag in parsed_html:
-            if isinstance(tag, NavigableString):
-                shortdescription = shortdescription + str(tag)
-            else:
-                for content in tag.contents:
-                    # for each content, if br give \n otherwise get string value
-                    if 'class' in tag.attrs and 'flavor' in str(tag.attrs['class']):
-                        if tag.next.name in ['i']:
-                            record = False
-                        else:
-                            record = True
-                    if record is True:
-                        html_content = str(content)
-                        if '<br/>' in html_content:
-                            shortdescription = shortdescription + "\n"
-                        elif isinstance(content, NavigableString):
-                            shortdescription = shortdescription + str(content)
-                        elif isinstance(content, Tag):
-                            shortdescription = shortdescription + content.text
-                        else:
-                            print('Ended with something that neither a BR, a NavigableString nor a Tag...?!')
-            if record is True:
-                shortdescription = shortdescription + "\n"
-        record = False
-        fg_entry['shortdescription'] = shortdescription
+        fg_entry['description'] = "\n".join(description)
+        fg_entry['shortdescription'] = "\n".join(shortdescription)
 
         # Append a copy of generated entry
         Powers_fg.append(fg_entry.copy())
-        break
 
     print(str(len(Powers_fg)) + " entries converted to FG as Powers")
 
