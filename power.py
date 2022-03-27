@@ -3,6 +3,8 @@ import sys
 import shutil
 import pathlib
 import json
+from urllib.parse import unquote
+from create_db import create_db
 
 
 def write_db(filepath, fg_data):
@@ -39,19 +41,21 @@ if __name__ == '__main__':
     # Pull data from Portable Compendium
     data_source = {}
     sql_sections = []
-    for path in pathlib.Path("sources/").iterdir():
-        if path.is_file() and 'ddiPower' in path.stem:
-            with open(path, encoding="utf8") as inp:
-                for section in inp.read().split("INSERT INTO `Power` VALUES"):
-                    sql_sections.append(section)
-    sql_sections.pop(0)
+
+    db = []
+
+    try:
+        db = create_db('ddiPower.sql', "','")
+    except:
+        print("Error reading data source.")
+
     for index, section in enumerate(sql_sections):
         html = section.split('.</p>\\r\\n    ', 1)[0] + '.</p>'
         html = '<h1' + html.split('<h1', 1)[1]
         html = html.replace('\\', '')
-        data_source[index] = html
+    
 
-    print(str(len(data_source.keys())) + " entries recovered")
+    print(f"{len(db)} entries recovered")
 
     # Convert data to FG format
     print("converting to FG format...")
@@ -64,23 +68,34 @@ if __name__ == '__main__':
     except ImportError:
         from bs4 import BeautifulSoup, Tag, NavigableString
 
-    if not data_source.items():
+    if not db:
         print("NO DATA FOUND IN SOURCES, MAKE SURE YOU HAVE COPIED YOUR 4E PORTABLE COMPENDIUM DATA TO SOURCES!")
         input('Press enter to close.')
         sys.exit(0)
 
-    for key, value in data_source.items():
+    for row in db:
         fg_entry = {}
-        parsed_html = BeautifulSoup(value, features="html.parser").contents
+        fg_entry['name'] = row['Name']
+        fg_entry['action'] = row['Action']
+        fg_entry['recharge'] = row['Usage']
+        fg_entry['published'] = row['Source'].split(", ")
 
-        # Recover header data (from parsed_html [0], [1] and [2])
-        powername = str(parsed_html[0].next)
-        # In older version of the compendium the power span was in front of the power name
-        # If it's the case, the name is recovered in a different manner
-        if "<span" in powername:
-            powername = str(parsed_html[0].next.nextSibling)
-        fg_entry['name'] = powername
-        fg_entry['source'] = str(parsed_html[0].contents[0].next)
+        source = f"{row['Class']} {row['Kind']}"
+        level = row['Level']
+        source = source + f" {level}" if level != 0 else source
+        fg_entry['source'] = source
+
+        html = row['Txt']
+        html = html.replace('\\r\\n','\r\n').replace('\\','')
+
+        parsed_html = BeautifulSoup(html, features="html.parser")
+
+        powerstat = parsed_html.find('p', class_='powerstat')
+        print(type(powerstat))
+        top_stat, bot_stat = powerstat.split("<br/>")
+        print(top_stat)
+        print(bot_stat)
+
 
         # Ensure this is a flavor text
         flavor = str(parsed_html[1])
@@ -89,38 +104,6 @@ if __name__ == '__main__':
         else:
             flavor = ''
         fg_entry['flavor'] = flavor
-
-        # Get recharge from first element class since it's sometimes missing
-        cls = parsed_html[0].attrs['class'][0]
-        if cls in 'atwillpower':
-            recharge = 'At-Will'
-        elif cls in 'encounterpower':
-            recharge = 'Encounter'
-        elif cls in 'dailypower':
-            recharge = 'Daily'
-        fg_entry['recharge'] = recharge
-
-        # Recover action type (Located at LEN-2/LEN-4 of parsed_html[1]/parsed_html[2] contents)
-        l = len(parsed_html[2].contents)
-        action = str(parsed_html[2].contents[l-2].string)
-        if 'Action' in action or 'Immediate' in action:
-            ...
-        else:
-            action = str(parsed_html[2].contents[l-4].string)
-            if 'Action' in action or 'Immediate' in action:
-                ...
-            else:
-                # If action can't be found in parsed_html[2] then search it again in parsed_html[1]
-                l = len(parsed_html[1].contents)
-                action = str(parsed_html[1].contents[l-2].string)
-                if 'Action' in action or 'Immediate' in action:
-                    ...
-                else:
-                    action = str(parsed_html[1].contents[l-4].string)
-        if 'Action' in action:
-            fg_entry['action'] = action = action.split()[0]
-        elif'Immediate' in action:
-            fg_entry['action'] = action = action
 
         # Recover range (check if present in parsed_html[2] and go search it in parsed_html[1] otherwise)
         l = len(parsed_html[2].contents)
@@ -203,6 +186,7 @@ if __name__ == '__main__':
 
         # Append a copy of generated entry
         Powers_fg.append(fg_entry.copy())
+        break
 
     print(str(len(Powers_fg)) + " entries converted to FG as Powers")
 

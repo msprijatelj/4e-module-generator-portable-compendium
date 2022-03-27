@@ -5,7 +5,12 @@ def create_db(fn, splt):
 
     db_schema = get_schema(contents)
     db_values = get_values(contents, splt)
-    return db_schema, db_values
+
+    db = [{}]*len(db_values)
+    for i, vals in enumerate(db_values):
+        db[i] = dict(zip(db_schema.copy(), vals))
+
+    return db
 
 def get_schema(contents):
     insert_index = contents.find("INSERT")
@@ -35,10 +40,8 @@ def get_values(contents, splt):
         # Take off the tail of the query
         value_str = "".join(value_str.split("');")[:-1])
         values[i] = value_str.split(splt)
-        break
     return values
 
 if __name__ == "__main__":
-    SCHEMA, VALUES = create_db("ddiMonster.sql", "','")
-    print(SCHEMA)
-    print(VALUES[0])
+    DATABASE = create_db("ddiMonster.sql", "','")
+    print(DATABASE[0])
