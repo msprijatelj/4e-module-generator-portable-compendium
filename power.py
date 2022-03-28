@@ -54,8 +54,9 @@ def construct_description(tags):
             if soup.p:
                 soup.p.wrap(soup.new_tag('p'))
                 soup.p.p.unwrap()
+                # Replace any line breaks with new p tags or newline characters
+                description += [str(soup).replace("<br/>", "</p>\n<p>")]
                 replace_line_breaks(soup)
-                description += [str(soup)]
                 shortdescription += [soup.text]
     return description, shortdescription
 
