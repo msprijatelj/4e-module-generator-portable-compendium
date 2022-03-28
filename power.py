@@ -3,6 +3,7 @@ import sys
 import shutil
 import pathlib
 import json
+import copy
 from urllib.parse import unquote
 from create_db import create_db
 from bs4 import BeautifulSoup, Tag, NavigableString
@@ -35,6 +36,9 @@ def write_db(filepath, fg_data):
         file.write('	</powerdesc>\n')
         file.write('</root>')
 
+def replace_line_breaks(soup):
+    while soup.p.br:
+        soup.p.br.replace_with('\n')
 
 def construct_description(tags):
     description = []
@@ -50,6 +54,7 @@ def construct_description(tags):
             if soup.p:
                 soup.p.wrap(soup.new_tag('p'))
                 soup.p.p.unwrap()
+                replace_line_breaks(soup)
                 description += [str(soup)]
                 shortdescription += [soup.text]
     return description, shortdescription
@@ -75,14 +80,14 @@ if __name__ == '__main__':
     print("converting to FG format...")
 
     # Initialize all modules databases
-    Powers_fg = []
+    Powers_fg = [{}]*len(db)
 
     if not db:
         print("NO DATA FOUND IN SOURCES, MAKE SURE YOU HAVE COPIED YOUR 4E PORTABLE COMPENDIUM DATA TO SOURCES!")
         input('Press enter to close.')
         sys.exit(0)
 
-    for row in db:
+    for i, row in enumerate(db):
 
         fg_entry = {}
 
@@ -144,7 +149,6 @@ if __name__ == '__main__':
         # Description will include all mechanics text + Published line.
         power_mechanics = powerstat.find_next_siblings('p', class_=['powerstat', 'flavor'])
 
-
         try:
             description, shortdescription = construct_description(power_mechanics)
 
@@ -163,7 +167,7 @@ if __name__ == '__main__':
         fg_entry['shortdescription'] = "\n".join(shortdescription)
 
         # Append a copy of generated entry
-        Powers_fg.append(fg_entry.copy())
+        Powers_fg[i] = copy.deepcopy(fg_entry)
 
     print(str(len(Powers_fg)) + " entries converted to FG as Powers")
 
