@@ -1,10 +1,7 @@
 import os
 import sys
 import shutil
-import pathlib
-import json
 import copy
-from urllib.parse import unquote
 from helpers.create_db import create_db
 from bs4 import BeautifulSoup, Tag, NavigableString
 
@@ -88,11 +85,7 @@ def construct_description(tags, tag_classes):
 if __name__ == '__main__':
 
     # Pull data from Portable Compendium
-    data_source = {}
-    sql_sections = []
-
     db = []
-
     try:
         db = create_db('ddiPower.sql', "','")
     except:
