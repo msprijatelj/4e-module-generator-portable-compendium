@@ -1,7 +1,7 @@
 # 4e-module-generator-portable-compendium
 A set of scripts for converting data from the D&amp;D 4e Portable Compendium into Fantasy Grounds modules.
 
-The original "4E Module Generator - Portable Compendium" package was provided by VegaFontana on the [Fantasy Grounds 4e Forums](https://www.fantasygrounds.com/forums/showthread.php?60524-4E-Module-Generator-Portable-compendium-gt-Fantasy-Grounds) under a GNU GPL-3.0 License.  This repository builds off of that package to improve how it parses Portable Compendium data and generates Fantasy Grounds modules from that data.
+The original "4E Module Generator - Portable Compendium" package was provided by VegaFontana on the [Fantasy Grounds 4e Forums](https://www.fantasygrounds.com/forums/showthread.php?60524-4E-Module-Generator-Portable-compendium-gt-Fantasy-Grounds) under a GNU GPL-3.0 License.  This repository modifies and builds off of that package to improve how it parses Portable Compendium data and generates Fantasy Grounds modules from that data.
 
 This package is designed to work with the `.sql` files from Portable Compendium version Beta 30.
 
