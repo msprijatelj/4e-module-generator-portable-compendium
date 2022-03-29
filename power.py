@@ -36,17 +36,35 @@ def write_db(filepath, fg_data):
         file.write('	</powerdesc>\n')
         file.write('</root>')
 
+# Linked Powers, when present, are formatted like this:
+#			<linkedpowers>
+#               <!-- Link to the top-level power description -->
+#				<id-00001>
+#					<link type="windowreference">
+#						<class>powerdesc</class>
+#						<recordname>powerdesc.id-12345</recordname>
+#					</link>
+#				</id-00001>
+#               <!-- Direct link to power, with parsed description -->
+#				<id-00002>
+#					<link type="windowreference">
+#						<class>reference_power_custom</class>
+#						<recordname>powerdesc.id-67890</recordname>
+#					</link>
+#				</id-00002>
+#           </linkedpowers>
+
 def replace_line_breaks(soup):
     while soup.p.br:
         soup.p.br.replace_with('\n')
 
-def construct_description(tags):
+def construct_description(tags, tag_classes):
     description = []
     shortdescription = []
     for t in tags:
-        p_tags = t.find_all('p', class_=['powerstat', 'flavor'])
-        if p_tags:
-            desc, sdesc = construct_description(p_tags)
+        child_tags = t.find_all(class_=tag_classes)
+        if child_tags:
+            desc, sdesc = construct_description(child_tags, tag_classes)
             description += desc
             shortdescription+= sdesc
         else:
@@ -57,6 +75,11 @@ def construct_description(tags):
                 # Replace any line breaks with new p tags or newline characters
                 description += [str(soup).replace("<br/>", "</p>\n<p>")]
                 replace_line_breaks(soup)
+                shortdescription += [soup.text]
+            elif soup.h1:
+                soup.h1.wrap(soup.new_tag('h'))
+                soup.h.h1.unwrap()
+                description += [str(soup)]
                 shortdescription += [soup.text]
     return description, shortdescription
 
@@ -145,13 +168,14 @@ if __name__ == '__main__':
             flavortext = flavor_tag.text
         fg_entry['flavor'] = flavortext
 
-        # Everything in a 'p' tag after the stat line is mechanics text.
-        # Mechanics are either 'powerstat' or 'flavor'.
+        # Everything in a tag after the stat line is mechanics text.
+        # Mechanics text can be either p (normal mechanics) or h1 (embedded power header).
         # Description will include all mechanics text + Published line.
-        power_mechanics = powerstat.find_next_siblings('p', class_=['powerstat', 'flavor'])
+        sibling_classes = ['powerstat', 'flavor', 'atwillpower', 'encounterpower', 'dailypower']
+        power_mechanics = powerstat.find_next_siblings(class_=sibling_classes)
 
         try:
-            description, shortdescription = construct_description(power_mechanics)
+            description, shortdescription = construct_description(power_mechanics, sibling_classes)
 
             # Grab the Published line without external links, in class-less p tag
             published_in = parsed_html.find('p', class_='publishedIn')
