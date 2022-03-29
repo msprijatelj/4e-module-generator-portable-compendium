@@ -72,7 +72,7 @@ if __name__ == '__main__':
         composed_name = parsed_html[0].text
         start = composed_name.find('[')
         end = composed_name.find(']')
-        if start is not -1 and end is not -1:
+        if start != -1 and end != -1:
             name = composed_name[0:start-1]
             context = composed_name[start+1:end]
         else:
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         power_end = -1
         for tag in parsed_html:
             if isinstance(tag, Tag):
-                if tag.name in 'h1' and power_start is -1:
+                if tag.name in 'h1' and power_start == -1:
                     if 'player' not in tag.attrs['class'][0]:
                         power_start = i
                 elif tag.name in 'p':
@@ -107,7 +107,7 @@ if __name__ == '__main__':
             i = i + 1
 
         # Add remaining information to Feat core data (shortdescription), ignore power section if present.
-        if power_start is not -1 and power_end is not -1 and power_start < power_end:
+        if power_start != -1 and power_end != -1 and power_start < power_end:
             # get sub section from power_end
             remaining_info = parsed_html[power_end+1:len(parsed_html)]
         else:
@@ -130,17 +130,23 @@ if __name__ == '__main__':
 
     print(str(len(Feat_fg)) + " entries converted to FG as Feats")
 
+    export_dir = f'{os.getcwd()}/export/feats'
+    archive_fmt = 'zip'
+    data_dir = f'{export_dir}/data/'
+    tmp_name = f'{export_dir}/4e_Feat'
+    mod_name = f'{export_dir}/4e_Feat_PortableCompendium.mod'
+
     # Write FG XML database files
-    write_db('export/feats/data/db.xml', Feat_fg)
+    write_db(f'{export_dir}/data/db.xml', Feat_fg)
 
     print("Database files written. Job done.")
 
     try:
-        os.remove('export/feats/4e_Feat_PortableCompendium.mod')
+        os.remove(mod_name)
     except FileNotFoundError:
         print("Cleanup not needed.")
-    shutil.make_archive('export/feats/4e_Feat', 'zip', 'export/feats/data/')
-    os.rename('export/feats/4e_Feat.zip', 'export/feats/4e_Feat_PortableCompendium.mod')
+    shutil.make_archive(tmp_name, archive_fmt, data_dir)
+    os.rename(f'{tmp_name}.{archive_fmt}', mod_name)
 
     print("\nDatabase added and module generated!")
     print("You can find it in the 'export\\feat' folder\n")

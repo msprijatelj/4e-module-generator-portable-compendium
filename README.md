@@ -3,6 +3,8 @@ A set of scripts for converting data from the D&amp;D 4e Portable Compendium int
 
 This package was originally provided by VegaFontana on the [Fantasy Grounds 4e Forums](https://www.fantasygrounds.com/forums/showthread.php?60524-4E-Module-Generator-Portable-compendium-gt-Fantasy-Grounds).  It is provided here with modifications.
 
+This package is designed to work with the `.sql` files from Portable Compendium version Beta 30.
+
 ## How to Use
 1. Copy the ddiFeat.sql, ddiPower.sql and ddiMonster.sql, files from "PathYoYourPortableCompendium/sql/".
 
@@ -19,3 +21,14 @@ This package was originally provided by VegaFontana on the [Fantasy Grounds 4e F
 6. Just copy these 3 modules from their export folders into your FG modules folder (default should be ".../Fantasy Gounds/Data/modules") and load them in your campain!
 
 7. Don't forget to give access to your players to the basic items / feats / powers modules to ease character creation.
+
+## Development
+Install the required packages and begin to develop!
+```bash
+pip install -r requirements.txt
+```
+
+To package each script in its own `.exe` file, run the following command for each python script (`feat.py`, `npc.py`, and `power.py`):
+```
+pyinstaller ${script_name} --onefile --distpath .
+```
