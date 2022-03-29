@@ -5,7 +5,7 @@ import pathlib
 import json
 import copy
 from urllib.parse import unquote
-from create_db import create_db
+from helpers.create_db import create_db
 from bs4 import BeautifulSoup, Tag, NavigableString
 
 
@@ -205,10 +205,14 @@ if __name__ == '__main__':
         os.remove('export/powers/4e_Power_PortableCompendium.mod')
     except FileNotFoundError:
         print("Cleanup not needed.")
-    shutil.make_archive('export/powers/4e_Power', 'zip', 'export/powers/data/')
-    os.rename('export/powers/4e_Power.zip', 'export/powers/4e_Power_PortableCompendium.mod')
-
-    print("\nDatabase added and module generated!")
-    print("You can find it in the 'export\\power' folder\n")
+    try:
+        shutil.make_archive('export/powers/4e_Power', 'zip', 'export/powers/data/')
+        os.rename('export/powers/4e_Power.zip', 'export/powers/4e_Power_PortableCompendium.mod')
+        print("\nDatabase added and module generated!")
+        print("You can find it in the 'export\\power' folder\n")
+    except Exception as e:
+        print(f"Error creating zipped .mod file:\n{e}")
+        print("\nManually zip the contents of the 'export\\power\\data' folder to create the mod.")
+        print("Rename the complete filename (including path) to '4e_Power_PortableCompendium.mod'.\n")
 
     input('Press enter to close.')
