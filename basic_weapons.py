@@ -89,61 +89,61 @@ if __name__ == '__main__':
         if class_lbl := parsed_html.find(string=re.compile('^(Simple|Military|Superior|Improvised).*')):
             class_lbl = re.sub(' *$', '', class_lbl)
             if class_lbl == 'Simple one-handed melee weapon':
-                class_str = 'Simple Melee Weapon'
+                class_str = 'Simple Melee Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Simple two-handed melee weapon':
-                class_str = 'Simple Melee Weapon'
+                class_str = 'Simple Melee Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Military one-handed melee weapon':
-                class_str = 'Military Melee Weapon'
+                class_str = 'Military Melee Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Military two-handed melee weapon':
-                class_str = 'Military Melee Weapon'
+                class_str = 'Military Melee Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Superior one-handed melee weapon':
-                class_str = 'Superior Melee Weapon'
+                class_str = 'Superior Melee Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Superior two-handed melee weapon':
-                class_str = 'Superior Melee Weapon'
+                class_str = 'Superior Melee Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Superior double melee weapon':
-                class_str = 'Superior Melee Weapon'
+                class_str = 'Superior Melee Weapons'
                 subclass_str = 'Double'
             elif class_lbl == 'Improvised one-handed melee weapon':
-                class_str = 'Improvised Melee Weapon'
+                class_str = 'Improvised Melee Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Improvised two-handed melee weapon':
-                class_str = 'Improvised Melee Weapon'
+                class_str = 'Improvised Melee Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Simple one-handed ranged weapon':
-                class_str = 'Simple Ranged Weapon'
+                class_str = 'Simple Ranged Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Simple two-handed ranged weapon':
-                class_str = 'Simple Ranged Weapon'
+                class_str = 'Simple Ranged Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Military one-handed ranged weapon':
-                class_str = 'Military Ranged Weapon'
+                class_str = 'Military Ranged Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Military two-handed ranged weapon':
-                class_str = 'Military Ranged Weapon'
+                class_str = 'Military Ranged Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Superior one-handed ranged weapon':
-                class_str = 'Superior Ranged Weapon'
+                class_str = 'Superior Ranged Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Superior two-handed ranged weapon':
-                class_str = 'Superior Ranged Weapon'
+                class_str = 'Superior Ranged Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Improvised one-handed ranged weapon':
-                class_str = 'Improvised Ranged Weapon'
+                class_str = 'Improvised Ranged Weapons'
                 subclass_str = 'One-Handed'
             elif class_lbl == 'Improvised two-handed ranged weapon':
-                class_str = 'Improvised Ranged Weapon'
+                class_str = 'Improvised Ranged Weapons'
                 subclass_str = 'Two-Handed'
             elif class_lbl == 'Superior':
-                class_str = 'Superior Implement'
+                class_str = 'Superior Implements'
             # Garotte typo
             elif class_lbl == 'Superior two-handed  weapon':
-                class_str = 'Superior Melee Weapon'
+                class_str = 'Superior Melee Weapons'
                 subclass_str = 'Two-Handed'
             else:
                 class_str = class_lbl

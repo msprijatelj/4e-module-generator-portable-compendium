@@ -64,8 +64,8 @@ def multi_level(soup_in):
 def power_construct(lines_list):
 
     # List of keywords to be included
-    keywords_list = ['Acid', 'Augmentable', 'Aura', 'Charm', 'Cold', 'Conjuration', 'Consumable', 'Fear', 'Fire', 'Healing', 'Illusion', 'Implement',\
-        'Lightning', 'Necrotic', 'Poison', 'Polymorph', 'Psychic', 'Radiant', 'Summoning', 'Teleportation', 'Thunder', 'Varies', 'Weapon', 'Zone']
+    keywords_list = ['Acid', 'Augmentable', 'Aura', 'Charm', 'Cold', 'Conjuration', 'Fear', 'Fire', 'Healing', 'Illusion', 'Implement',\
+        'Lightning', 'Necrotic', 'Poison', 'Polymorph', 'Psychic', 'Radiant', 'Sleep', 'Summoning', 'Teleportation', 'Thunder', 'Varies', 'Weapon', 'Zone']
 
     action_str = ''
     keywords_str = ''
@@ -89,18 +89,20 @@ def power_construct(lines_list):
                 keywords_str += ', ' if keywords_str != '' else ''
                 keywords_str += kwd
 
-##        range_test = re.search(r'(Area|Close|Burst)', line)
-##        if range_test != None:
-##           range_str = range_test.group(1)
+        # Range
+        # take only the first entry as some multi-level items increase range with level
+        range_test = re.search(r'(Area.*?|Close.*?|Ranged.*?)[;($\.]', line)
+        if range_test != None and range_str == '':
+           range_str = range_test.group(1).strip()
 
         # Recharge
-        recharge_test = re.search(r'(At-will Attack|At-Will Attack|At-will Utillity|At-Will Utility|At-will|At-Will|Daily Attack|Daily Utility|Daily|Encounter)', line)
+        recharge_test = re.search(r'(At-will Attack|At-Will Attack|At-will Utillity|At-Will Utility|At-will|At-Will|Consumable|Daily Attack|Daily Utility|Daily|Encounter)', line)
         if recharge_test != None:
             recharge_str = recharge_test.group(1)
 
         # Description
         # also include any line that doesn't find an action, range, recharge or source is added to shortdescription
-        shortdescription_test = re.search(r'(^As|^Attack:|Effect|Hit|Level|Miss|Trigger|You)', line)
+        shortdescription_test = re.search(r'(^As|^Attack:|Effect|Hit|Level|Make|Miss|Trigger|You)', line)
         if shortdescription_test != None or (action_test == None and recharge_test == None):
             if shortdescription_str != '':
                 shortdescription_str += '\\n'
@@ -116,7 +118,6 @@ def power_construct(lines_list):
     power_dict['shortdescription'] = shortdescription_str
 
     return power_dict
-
 
 def powers_format(soup_in):
     id = 0
@@ -236,7 +237,7 @@ if __name__ == '__main__':
         subclass_str = ''
 
         # Class
-        if (re.search('^(Alternative Reward|Ammunition|Arms|Companion|Consumable|Familiar|Feet|Head|Head and Neck|Neck|Mount|Ring|Waist|Wondrous)$', category_str) and re.search('^(Common|Uncommon|Rare)', rarity_str)):
+        if (re.search('^(Alchemical Item|Alternative Reward|Ammunition|Arms|Companion|Consumable|Familiar|Feet|Head|Head and Neck|Neck|Mount|Ring|Waist|Wondrous)$', category_str) and re.search('^(Common|Uncommon|Rare)', rarity_str)):
             class_str = rarity_str
             mitype_str = 'other'
 
