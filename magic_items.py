@@ -237,7 +237,7 @@ if __name__ == '__main__':
         subclass_str = ''
 
         # Class
-        if (re.search('^(Alchemical Item|Alternative Reward|Ammunition|Arms|Companion|Consumable|Familiar|Feet|Head|Head and Neck|Neck|Mount|Ring|Waist|Wondrous)$', category_str) and re.search('^(Common|Uncommon|Rare)', rarity_str)):
+        if (re.search('^(Alchemical Item|Alternative Reward|Ammunition|Arms|Companion|Consumable|Familiar|Feet|Hands|Head|Head and Neck|Neck|Mount|Ring|Waist|Wondrous)$', category_str) and re.search('^(Common|Uncommon|Rare)', rarity_str)):
             class_str = rarity_str
             mitype_str = 'other'
 
@@ -245,7 +245,7 @@ if __name__ == '__main__':
             print(str(i) + ' ' + name_str)
 
             # Ensure the category_str matches the bold label to avoid false matches e.g. 'Ring'
-            if re.search('(Arms|Familiar|Feet|Head|Head and Neck|Neck|Ring|Waist)', category_str):
+            if re.search('(Arms|Familiar|Feet|Hands|Head|Head and Neck|Neck|Ring|Waist)', category_str):
                 category_str += ' Slot'
             elif category_str == 'Wondrous':
                 category_str = 'Wondrous Item'
@@ -300,12 +300,16 @@ if __name__ == '__main__':
                 flavor_str = re.sub('\s\s', ' ', flavor_lbl.get_text(separator = '\\n', strip = True))
 
             # Subclass (category)
+            # look for a <p> that begins with the category_str
             if subclass_cat := parsed_html.find('p', class_='mistat').find(string=re.compile('^' + category_str)):
+                # Tome of Shadow workaround
                 if subclass_cat == 'Artifact: Implement (Orb)':
                     subclass_str = 'Implement (Orb)'
+                # if the next tag contains 'Property' then there is nothing to find
                 elif subclass_lbl := subclass_cat.parent.next_sibling:
                     if subclass_lbl.text == 'Property':
                         subclass_str = ''
+                    # otherwise try to extract a string that is different to the category_str
                     else:
                         subclass_str = re.search(r'^([a-zA-Z \(\)]*)', subclass_lbl).group(1)
                         subclass_str = '' if subclass_str == category_str else subclass_str
