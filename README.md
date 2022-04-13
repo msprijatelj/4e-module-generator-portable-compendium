@@ -8,7 +8,7 @@ The original "4E Module Generator - Portable Compendium" package was provided by
 It is designed to work with `.sql` data files from the Beta 30 version of the 4e Portable Compendium.
 
 ## How to Use
-1. Copy the `ddiFeat.sql`, `ddiPower.sql`, and `ddiMonster.sql` files from `/path/to/portablecompendium/sql/`.
+1. Copy the `ddiFeat.sql`, `ddiPower.sql`, `ddiItem.sql`, and `ddiMonster.sql` files from `/path/to/portablecompendium/sql/`.
 
 2. Paste the `.sql`files inside the `sources` folder of the generator located at "4E Module Generator - Portable Compendium/sources/".
 
@@ -30,7 +30,7 @@ Install the required packages and begin to develop!
 pip install -r requirements.txt
 ```
 
-To package each script in its own `.exe` file, run the following command for each python script (`feat.py`, `npc.py`, and `power.py`):
+To package each script in its own `.exe` file, run the following command for each python script within the root folder (`feat.py`, `npc.py`, `power.py`, etc.):
 ```
 pyinstaller ${script_name} --onefile --distpath .
 ```
