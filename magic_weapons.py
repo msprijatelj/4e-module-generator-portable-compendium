@@ -158,13 +158,13 @@ if __name__ == '__main__':
     except FileNotFoundError:
         print("Cleanup not needed.")
     try:
-        shutil.make_archive('export/mods/4E_Magic_Weapons', 'zip', 'export/mods/data/')
+        shutil.make_archive('export/mods/4E_Magic_Weapons', 'zip', 'export/magic_weapons/data/')
         os.rename('export/mods/4E_Magic_Weapons.zip', 'export/mods/4E_Magic_Weapons.mod')
         print("\nDatabase added and module generated!")
         print("You can find it in the 'export\\mods' folder\n")
     except Exception as e:
         print(f"Error creating zipped .mod file:\n{e}")
-        print("\nManually zip the contents of the 'export\\magic_weapon\\data' folder to create the mod.")
+        print("\nManually zip the contents of the 'export\\magic_weapons\\data' folder to create the mod.")
         print("Rename the complete filename (including path) to '4E_Magic_Weapons.mod'.\n")
 
     input('Press enter to close.')
