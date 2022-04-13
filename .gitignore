@@ -135,4 +135,5 @@ dmypy.json
 # Generated DB and mod files
 *.db
 *db.xml
+*client.xml
 *.mod
