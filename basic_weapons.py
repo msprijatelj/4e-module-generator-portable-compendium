@@ -3,35 +3,9 @@ import sys
 import shutil
 import copy
 import re
-from helpers.create_db import create_db
 from bs4 import BeautifulSoup, Tag, NavigableString
-
-def write_db(filepath, fg_data):
-    with open(filepath, mode='w', encoding='UTF-8', errors='strict', buffering=1) as file:
-        # item counter
-        id = 0
-
-        file.write('<root version="2.9">\n')
-        file.write('\t<item>\n')
-        for entry in fg_data:
-            id += 1
-            entrry_id = "00000"[0:len("00000")-len(str(id))] + str(id)
-            file.write(f'\t\t<id-{entrry_id}>\n')
-
-            for tag in sorted(entry.keys()):
-                if entry[tag] != '':
-                    # choose the write statement depending on the 'type' attribute
-                    if re.search('^(powers|props)$', tag):
-                        file.write(f'\t\t\t<{tag}>{entry[tag]}</{tag}>\n')
-                    elif re.search('^(ac|bonus|checkpenalty|level|min_enhance|profbonus|range|speed|weight)$', tag):
-                        file.write(f'\t\t\t<{tag} type="number">{entry[tag]}</{tag}>\n')
-                    else:
-                        file.write(f'\t\t\t<{tag} type="string">{entry[tag]}</{tag}>\n')
-
-            file.write(f'\t\t</id-{entrry_id}>\n')
-        file.write('\t</item>\n')
-        file.write('</root>')
-        return str(id)
+from helpers.create_db import create_db
+from helpers.mod_helpers import write_db
 
 if __name__ == '__main__':
 
@@ -60,7 +34,7 @@ if __name__ == '__main__':
         '^Accurate', '^Blinking', '^Deadly', '^Distant', '^Empowered Crit', '^Forceful', '^Mighty', '^Mobile', '^Reaching', '^Shielding', '^Undeniable', '^Unerring', '^Unstoppable',\
         'Energized \(acid\)', 'Energized \(cold\)', 'Energized \(fire\)', 'Energized \(force\)', 'Energized \(lightning\)', 'Energized \(necrotic\)', 'Energized \(psychic\)', 'Energized \(radiant\)', 'Energized \(thunder\)']
 
-    for i, row in enumerate(db):
+    for i, row in enumerate(db, start=1):
 
         # Parse the HTML text 
         html = row['Txt']
@@ -251,14 +225,14 @@ if __name__ == '__main__':
     print(write_id + " module entries written. Job done.")
 
     try:
-        os.remove('export/basic_weapons/4E_Basic_Weapons.mod')
+        os.remove('export/mods/4E_Basic_Weapons.mod')
     except FileNotFoundError:
         print("Cleanup not needed.")
     try:
-        shutil.make_archive('export/basic_weapons/4E_Basic_Weapons', 'zip', 'export/basic_weapons/data/')
-        os.rename('export/basic_weapons/4E_Basic_Weapons.zip', 'export/basic_weapons/4E_Basic_Weapons.mod')
+        shutil.make_archive('export/mods/4E_Basic_Weapons', 'zip', 'export/basic_weapons/data/')
+        os.rename('export/mods/4E_Basic_Weapons.zip', 'export/mods/4E_Basic_Weapons.mod')
         print("\nDatabase added and module generated!")
-        print("You can find it in the 'export\\basic_weapons' folder\n")
+        print("You can find it in the 'export\\mods' folder\n")
     except Exception as e:
         print(f"Error creating zipped .mod file:\n{e}")
         print("\nManually zip the contents of the 'export\\basic_weapon\\data' folder to create the mod.")
