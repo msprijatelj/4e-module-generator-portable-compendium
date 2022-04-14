@@ -201,12 +201,24 @@ if __name__ == '__main__':
             else:
                 section_id = 100
 
-##        # Prof - Barding
-##        # use Type to denote Light/Heavy
-##        if re.search('^(Light|Heavy) Barding.*', name_str):
-##            prof_str = 'Barding'
-##            type_str = re.search(r'(Light|Heavy)', name_str).group(1)
-##            mitype_str = 'armor'
+        # Prof - Barding
+        # use Type to denote Normal/Huge
+        if name_str == 'Light Barding':
+            section_id = 7
+            prof_str = 'Barding'
+            type_str = 'Normal Creature'
+        elif name_str == 'Heavy Barding':
+            section_id = 7
+            prof_str = 'Barding'
+            type_str = 'Normal Creature'
+        elif name_str == 'Light Barding (Huge creature)':
+            section_id = 8
+            prof_str = 'Barding'
+            type_str = 'Huge Creature'
+        elif name_str == 'Heavy Barding (Huge creature)':
+            section_id = 8
+            prof_str = 'Barding'
+            type_str = 'Huge Creature'
 
         if section_id < 99:
             print(str(i) + ' ' + name_str)
@@ -220,10 +232,20 @@ if __name__ == '__main__':
                 checkpenalty_str = checkpenalty_lbl.parent.next_sibling.replace(': ', '')
 
             # Cost
-            if cost_lbl := parsed_html.find(string='Cost'):
+            if cost_lbl := parsed_html.find(string='Price'):
                 cost_str = re.sub('[^\.\d]', '', cost_lbl.parent.next_sibling)
-            elif cost_lbl := parsed_html.find(string='Price'):
+            elif cost_lbl := parsed_html.find(string='Cost'):
                 cost_str = re.sub('[^\.\d]', '', cost_lbl.parent.next_sibling)
+            elif cost_lbl := parsed_html.find(string=re.compile('^Cost:.*')):
+                cost_str = re.sub('[^\.\d]', '', cost_lbl.string)
+
+            if cost_str != '':
+                # Divide by 100 if cost is in cp
+                if re.search(r'cp', cost_str):
+                    cost_str = '0.0' + re.sub('[^\.\d]', '', cost_str)
+                # Divide by 10 if cost is in sp
+                elif re.search(r'sp', cost_lbl):
+                    cost_str = '0.' + re.sub('[^\.\d]', '', cost_str)
 
             # Description
             if description_lbl := parsed_html.find(string='Description'):

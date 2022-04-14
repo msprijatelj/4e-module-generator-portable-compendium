@@ -204,24 +204,22 @@ if __name__ == '__main__':
             print(str(i) + ' ' + name_str)
 
             # Cost
-            if cost_lbl := parsed_html.find(string=re.compile('^Cost:.*')):
-                # Divide by 100 if cost is in cp
-                if re.search(r'cp', cost_lbl):
-                    cost_str = '0.0' + re.sub('[^\.\d]', '', cost_lbl.string)
-                # Divide by 100 if cost is in cp
-                elif re.search(r'sp', cost_lbl):
-                    cost_str = '0.' + re.sub('[^\.\d]', '', cost_lbl.string)
-                else:
-                    cost_str = re.sub('[^\.\d]', '', cost_lbl.string)
             if cost_lbl := parsed_html.find(string='Price'):
+                cost_str = cost_lbl.parent.next_sibling
+            elif cost_lbl := parsed_html.find(string='Cost'):
+                cost_str = cost_lbl.parent.next_sibling
+            elif cost_lbl := parsed_html.find(string=re.compile('^Cost:.*')):
+                cost_str = cost_lbl.string
+
+            if cost_str != '':
                 # Divide by 100 if cost is in cp
-                if re.search(r'cp', cost_lbl.parent.next_sibling):
-                    cost_str = '0.0' + re.sub('[^\.\d]', '', cost_lbl.parent.next_sibling)
-                # Divide by 100 if cost is in cp
-                elif re.search(r'sp', cost_lbl.parent.next_sibling):
-                    cost_str = '0.' + re.sub('[^\.\d]', '', cost_lbl.parent.next_sibling)
+                if re.search(r'cp', cost_str):
+                    cost_str = '0.0' + re.sub('[^\.\d]', '', cost_str)
+                # Divide by 10 if cost is in sp
+                elif re.search(r'sp', cost_lbl):
+                    cost_str = '0.' + re.sub('[^\.\d]', '', cost_str)
                 else:
-                    cost_str = re.sub('[^\.\d]', '', cost_lbl.parent.next_sibling)
+                    cost_str = re.sub('[^\.\d]', '', cost_str)
 
             # Description
             if description_lbl := parsed_html.find(string='Description'):
@@ -237,7 +235,8 @@ if __name__ == '__main__':
 
             # Description (Published In)
             if description_lbl := parsed_html.find('p', class_='publishedIn'):
-                description_str += re.sub('\s\s', ' ', description_lbl.text) if description_str == '' else '\\n' + re.sub('\s\s', ' ', description_lbl.text)
+                descrption_str = description_str if description_str == '' else description_str + '\\n'
+                description_str += re.sub('\s\s', ' ', description_lbl.text.replace(', ', '\\n'))
 
             # clean up extraneous spaces
             description_str = re.sub('\s\s', ' ', description_str.strip())
