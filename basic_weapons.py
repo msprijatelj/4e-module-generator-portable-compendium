@@ -274,7 +274,6 @@ if __name__ == '__main__':
             else:
                 section_id = 100
                 type_str = type_lbl
-            mitype_str = 'weapon'
 
         # Records to be processed
         if section_id < 99:
@@ -282,9 +281,9 @@ if __name__ == '__main__':
 
             # Cost
             if cost_lbl := parsed_html.find(string=re.compile('^Cost:.*')):
-                cost_str = re.sub('[^\.\d]', '', cost_lbl.string)
+                cost_str = re.sub('[^\.\d]', '', cost_lbl.string.replace('5 sp', '0.5 gp'))
             elif cost_lbl := parsed_html.find(string='Price'):
-                cost_str = re.sub('[^\.\d]', '', cost_lbl.parent.next_sibling)
+                cost_str = re.sub('[^\.\d]', '', cost_lbl.parent.next_sibling.replace('5 sp', '0.5 gp'))
 
             # Damage
             if damage_lbl := parsed_html.find(string='Damage'):
@@ -309,8 +308,8 @@ if __name__ == '__main__':
                         description_str += re.sub('^[:\s]*', '', el_str)
 
             # Description (Published In)
-            if special_lbl := parsed_html.find('p', class_='publishedIn'):
-                description_str += re.sub('\s\s', ' ', special_lbl.text) if description_str == '' else '\\n' + re.sub('\s\s', ' ', special_lbl.text)
+            if description_lbl := parsed_html.find('p', class_='publishedIn'):
+                description_str += re.sub('\s\s', ' ', description_lbl.text) if description_str == '' else '\\n' + re.sub('\s\s', ' ', description_lbl.text)
 
             # clean up extraneous spaces
             description_str = re.sub('\s\s', ' ', description_str.strip())
