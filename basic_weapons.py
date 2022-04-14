@@ -6,7 +6,6 @@ import re
 from bs4 import BeautifulSoup, Tag, NavigableString
 from helpers.create_db import create_db
 
-
 def list_sorter(entry):
     section_id = entry["section_id"]
     name = entry["name"]
@@ -23,6 +22,7 @@ def write_lib(filepath, entry_list):
         file.write('<root version="2.9">\n')
 
         # Reference part
+        # These are the individual cards that appear when you click on a table entry
         file.write('\t<reference static="true">\n')
         file.write('\t\t<weapon>\n')
 
@@ -50,6 +50,7 @@ def write_lib(filepath, entry_list):
         file.write('\t</reference>\n')
 
         # Library part - not dynamic
+        # This controls the right-hand menu on the Modules screen
         file.write('\t<library>\n')
         file.write('\t\t<lib4ebasicweapons>\n')
         file.write('\t\t\t<name type="string">4E Basic Weapons</name>\n')
@@ -66,11 +67,12 @@ def write_lib(filepath, entry_list):
         file.write('\t\t</lib4ebasicweapons>\n')
         file.write('\t</library>\n')
 
-
+        # counters for Item List
         section_id = 0
         item_id = 0
 
         # Item List part
+        # This controls the table that appears when you click on a Library menu
         file.write('\t<weaponlists>\n')
         file.write('\t\t<core>\n')
         file.write('\t\t\t<description type="string">Weapons Table</description>\n')
@@ -147,9 +149,7 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # List of possible Weapon properties
-    properties_list = ['^Brutal 1', '^Brutal 2', '^Defensive', '^Heavy Thrown', '^High Crit', '^Light Thrown', '^Load Free', '^Load Minor', '^Load Move', '^Load Standard', '^Off-Hand', '^Reach[^i]', '^Small', '^Stout', '^Versatile',\
-        '^Accurate', '^Blinking', '^Deadly', '^Distant', '^Empowered Crit', '^Forceful', '^Mighty', '^Mobile', '^Reaching', '^Shielding', '^Undeniable', '^Unerring', '^Unstoppable',\
-        'Energized \(acid\)', 'Energized \(cold\)', 'Energized \(fire\)', 'Energized \(force\)', 'Energized \(lightning\)', 'Energized \(necrotic\)', 'Energized \(psychic\)', 'Energized \(radiant\)', 'Energized \(thunder\)']
+    properties_list = ['^Brutal 1', '^Brutal 2', '^Defensive', '^Heavy Thrown', '^High Crit', '^Light Thrown', '^Load Free', '^Load Minor', '^Load Move', '^Load Standard', '^Off-Hand', '^Reach[^i]', '^Small', '^Stout', '^Versatile']
 
     for i, row in enumerate(db, start=1):
 
@@ -347,19 +347,19 @@ if __name__ == '__main__':
 
             # Build the item dictionary
             export_dict = {}
-            export_dict['cost'] = float(cost_str) if cost_str != '' else ''
+            export_dict['cost'] = float(cost_str) if cost_str != '' else 0
             export_dict['damage'] = damage_str
-            export_dict['description'] = description_str
+            export_dict['description'] = re.sub('’', '\'', description_str)
             export_dict['group'] = group_str
             export_dict['heft'] = heft_str
-            export_dict['name'] = name_str
+            export_dict['name'] = re.sub('’', '\'', name_str)
             export_dict['prof'] = prof_str
             export_dict['profbonus'] = profbonus_str
             export_dict['properties'] = properties_str
             export_dict['range'] = range_str
             export_dict['section_id'] = section_id
             export_dict['type'] = type_str
-            export_dict['weight'] = '{:g}'.format(float(weight_str)) if weight_str != '' else ''
+            export_dict['weight'] = float(weight_str) if weight_str != '' else 0
 
             # Append a copy of generated item dictionary
             export_list.append(copy.deepcopy(export_dict))
