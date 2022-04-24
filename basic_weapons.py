@@ -383,6 +383,6 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"Error creating zipped .mod file:\n{e}")
         print("\nManually zip the contents of the 'export\\basic_weapon\\data' folder to create the mod.")
-        print("Rename the complete filename (including path) to '4E_Basic_Weapons.mod'.\n")
+        print("Rename the complete filename (including extension) to '4E_Basic_Weapons.mod'.\n")
 
     input('Press enter to close.')
