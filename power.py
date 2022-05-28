@@ -195,17 +195,17 @@ if __name__ == '__main__':
     print("Database files written. Job done.")
 
     try:
-        os.remove('export/powers/4e_Power_PortableCompendium.mod')
+        os.remove('export/mods/4e_Power_PortableCompendium.mod')
     except FileNotFoundError:
         print("Cleanup not needed.")
     try:
-        shutil.make_archive('export/powers/4e_Power', 'zip', 'export/powers/data/')
-        os.rename('export/powers/4e_Power.zip', 'export/powers/4e_Power_PortableCompendium.mod')
+        shutil.make_archive('export/mods/4e_Power', 'zip', 'export/powers/data/')
+        os.rename('export/mods/4e_Power.zip', 'export/mods/4e_Power_PortableCompendium.mod')
         print("\nDatabase added and module generated!")
-        print("You can find it in the 'export\\power' folder\n")
+        print("You can find it in the 'export\\mods' folder\n")
     except Exception as e:
         print(f"Error creating zipped .mod file:\n{e}")
-        print("\nManually zip the contents of the 'export\\power\\data' folder to create the mod.")
+        print("\nManually zip the contents of the 'export\\powers\\data' folder to create the mod.")
         print("Rename the complete filename (including extension) to '4e_Power_PortableCompendium.mod'.\n")
 
     input('Press enter to close.')

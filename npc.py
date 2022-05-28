@@ -374,17 +374,17 @@ if __name__ == '__main__':
                     if 'HP' in tag.text:
                         hp_value = str(tag.next_sibling).replace('; ', '')
                         hp_value = hp_value.replace('a missed attack never damages a minion.', '')
-                        fg_entry['hp'] = hp_value
+                        fg_entry['hp'] = hp_value.strip()
                     if 'AC' in tag.text:
-                        fg_entry['ac'] = str(tag.next_sibling).replace('; ', '')
+                        fg_entry['ac'] = str(tag.next_sibling).replace('; ', '').strip()
                     if 'Fortitude' in tag.text:
-                        fg_entry['fortitude'] = str(tag.next_sibling).replace(', ', '')
+                        fg_entry['fortitude'] = str(tag.next_sibling).replace(', ', '').strip()
                     if 'Reflex' in tag.text:
-                        fg_entry['reflex'] = str(tag.next_sibling).replace(', ', '')
+                        fg_entry['reflex'] = str(tag.next_sibling).replace(', ', '').strip()
                     if 'Will' in tag.text:
-                        fg_entry['will'] = str(tag.next_sibling)
+                        fg_entry['will'] = str(tag.next_sibling).strip()
                     if 'Saving Throws' in tag.text:
-                        fg_entry['save'] = str(tag.next_sibling)
+                        fg_entry['save'] = str(tag.next_sibling).strip()
                     if 'Immune' in tag.text:
                         fg_entry['specialdefenses'] = fg_entry['specialdefenses'] + 'Immune: ' + str(tag.next_sibling) + '\n'
                     if 'Resist' in tag.text:
@@ -392,9 +392,9 @@ if __name__ == '__main__':
                     if 'Vulnerable' in tag.text:
                         fg_entry['specialdefenses'] = fg_entry['specialdefenses'] + 'Vulnerable: ' + str(tag.next_sibling) + '\n'
                     if 'Speed' in tag.text:
-                        fg_entry['speed'] = str(tag.next_sibling)
+                        fg_entry['speed'] = str(tag.next_sibling).strip()
                     if 'Action Points' in tag.text:
-                        fg_entry['ap'] = str(tag.next_sibling)
+                        fg_entry['ap'] = str(tag.next_sibling).strip()
         # Handles situations where tables can be identified by <tbody>
         elif parsed_html[1].name and 'table' in parsed_html[1].name:
             contents_table = parsed_html[1].contents
@@ -415,17 +415,17 @@ if __name__ == '__main__':
                     if 'HP' in tag.text:
                         hp_value = str(tag.next_sibling).replace('; ', '')
                         hp_value = hp_value.replace('a missed attack never damages a minion.', '')
-                        fg_entry['hp'] = hp_value
+                        fg_entry['hp'] = hp_value.strip()
                     if 'AC' in tag.text:
-                        fg_entry['ac'] = str(tag.next_sibling).replace(', ', '')
+                        fg_entry['ac'] = str(tag.next_sibling).replace(', ', '').strip()
                     if 'Fortitude' in tag.text:
-                        fg_entry['fortitude'] = str(tag.next_sibling).replace(', ', '')
+                        fg_entry['fortitude'] = str(tag.next_sibling).replace(', ', '').strip()
                     if 'Reflex' in tag.text:
-                        fg_entry['reflex'] = str(tag.next_sibling).replace(', ', '')
+                        fg_entry['reflex'] = str(tag.next_sibling).replace(', ', '').strip()
                     if 'Will' in tag.text:
-                        fg_entry['will'] = str(tag.next_sibling).replace(' ; add your level to each defense', '')
+                        fg_entry['will'] = str(tag.next_sibling).replace(' ; add your level to each defense', '').strip()
                     if 'Saving Throws' in tag.text:
-                        fg_entry['save'] = str(tag.next_sibling)
+                        fg_entry['save'] = str(tag.next_sibling).strip()
                     if 'Immune' in tag.text:
                         fg_entry['specialdefenses'] = fg_entry['specialdefenses'] + 'Immune: ' + str(tag.next_sibling) + '\n'
                     if 'Resist' in tag.text:
@@ -433,9 +433,9 @@ if __name__ == '__main__':
                     if 'Vulnerable' in tag.text:
                         fg_entry['specialdefenses'] = fg_entry['specialdefenses'] + 'Vulnerable: ' + str(tag.next_sibling) + '\n'
                     if 'Speed' in tag.text:
-                        fg_entry['speed'] = str(tag.next_sibling)
+                        fg_entry['speed'] = str(tag.next_sibling).strip()
                     if 'Action Points' in tag.text:
-                        fg_entry['ap'] = str(tag.next_sibling)
+                        fg_entry['ap'] = str(tag.next_sibling).strip()
                 elif isinstance(tag, NavigableString):
                     if any(x in str(tag) for x in ('Low-light vision', 'Darkvision', 'Blindsight', 'All-around', 'Blind', 'Truesight', 'Tremorsense')):
                         fg_entry['senses'] = str(tag)
@@ -584,10 +584,19 @@ if __name__ == '__main__':
         os.remove('export/npc/4e_NPC_PortableCompendium.mod')
     except FileNotFoundError:
         print("Cleanup not needed.")
-    shutil.make_archive('export/npc/4e_NPC', 'zip', 'export/npc/data/')
-    os.rename('export/npc/4e_NPC.zip', 'export/npc/4e_NPC_PortableCompendium.mod')
 
-    print("\nDatabase added and module generated!")
-    print("You can find it in the 'export\\npc' folder\n")
+    try:
+        os.remove('export/mods/4e_NPC_PortableCompendium.mod')
+    except FileNotFoundError:
+        print("Cleanup not needed.")
+    try:
+        shutil.make_archive('export/mods/4e_NPC', 'zip', 'export/npc/data/')
+        os.rename('export/mods/4e_NPC.zip', 'export/mods/4e_NPC_PortableCompendium.mod')
+        print("\nDatabase added and module generated!")
+        print("You can find it in the 'export\\mods' folder\n")
+    except Exception as e:
+        print(f"Error creating zipped .mod file:\n{e}")
+        print("\nManually zip the contents of the 'export\\npc\\data' folder to create the mod.")
+        print("Rename the complete filename (including extension) to '4e_NPC_PortableCompendium.mod'.\n")
 
     input('Press enter to close.')

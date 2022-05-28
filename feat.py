@@ -130,25 +130,23 @@ if __name__ == '__main__':
 
     print(str(len(Feat_fg)) + " entries converted to FG as Feats")
 
-    export_dir = f'{os.getcwd()}/export/feats'
-    archive_fmt = 'zip'
-    data_dir = f'{export_dir}/data/'
-    tmp_name = f'{export_dir}/4e_Feat'
-    mod_name = f'{export_dir}/4e_Feat_PortableCompendium.mod'
-
     # Write FG XML database files
-    write_db(f'{export_dir}/data/db.xml', Feat_fg)
+    write_db(f'export/feats/data/db.xml', Feat_fg)
 
     print("Database files written. Job done.")
 
     try:
-        os.remove(mod_name)
+        os.remove('export/mods/4e_Feat_PortableCompendium.mod')
     except FileNotFoundError:
         print("Cleanup not needed.")
-    shutil.make_archive(tmp_name, archive_fmt, data_dir)
-    os.rename(f'{tmp_name}.{archive_fmt}', mod_name)
-
-    print("\nDatabase added and module generated!")
-    print("You can find it in the 'export\\feat' folder\n")
+    try:
+        shutil.make_archive('export/mods/4e_Feat', 'zip', 'export/feats/data/')
+        os.rename('export/mods/4e_Feat.zip', 'export/mods/4e_Feat_PortableCompendium.mod')
+        print("\nDatabase added and module generated!")
+        print("You can find it in the 'export\\mods' folder\n")
+    except Exception as e:
+        print(f"Error creating zipped .mod file:\n{e}")
+        print("\nManually zip the contents of the 'export\\feats\\data' folder to create the mod.")
+        print("Rename the complete filename (including extension) to '4e_Feat_PortableCompendium.mod'.\n")
 
     input('Press enter to close.')
