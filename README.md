@@ -1,3 +1,10 @@
+# ATTENTION: This repo is NOT actively maintained!
+I highly recommend using [skelekon's converter](https://github.com/skelekon/4e-portable-compendium-module-maker), as it is actively maintained and converts a much larger selection of data, with features that I never got the chance to implement in this repository. Check it out; I hope it helps your games!
+
+If you still wish to use this repo's converter, instructions remain below:
+
+-------------------
+
 # 4e-module-generator-portable-compendium
 A set of scripts for converting data from the D&amp;D 4e Portable Compendium into Fantasy Grounds modules.
 
